@@ -5,3 +5,4 @@ SOURCE = 0
 VIDEO_FLAG = False
 SAVE_DATA = False
 FPS = 10
+LOG_LEVEL=30
