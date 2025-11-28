@@ -1,0 +1,7 @@
+# this is the config file of the projects 
+
+
+SOURCE = 0 
+VIDEO_FLAG = False
+SAVE_DATA = False
+FPS = 10
