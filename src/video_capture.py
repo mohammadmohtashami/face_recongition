@@ -1,18 +1,20 @@
 import cv2 
-import logging 
+from utils.logger import logger
+
+Logger = logger("video_capture")
 
 def stream_capture(SOURCE):
     cap = cv2.VideoCapture(SOURCE)
     
     if not cap.isOpened():
-        logging.error("Camera cannot be opened")
+        Logger.error("Camera cannot be opened")
         return
     
     try:
         while True:
             ret, frame = cap.read()
             if not ret:
-                logging.error("Failed to grab frame")
+                Logger.error("Failed to grab frame")
                 break
                 
             yield frame 
@@ -20,7 +22,7 @@ def stream_capture(SOURCE):
     finally:
         cap.release()
         cv2.destroyAllWindows()
-        logging.info("Camera resources released")
+        Logger.info("Camera resources released")
 
 
 
