@@ -1,7 +1,7 @@
 import yaml 
 import os 
 from pathlib import Path
-import logging
+from utils.logger import logger 
 from dotenv import load_dotenv
 from face_detection import detect
 from video_capture import stream_capture
@@ -16,11 +16,7 @@ VIDEO_FLAG = os.getenv("VIDEO_FLAG",False)
 SAVE_DATA = os.getenv("SAVE_DATA", False)
 LOG_LEVEL =os.getenv("LOG_LEVEL" , 30)
 
-logging.basicConfig(
-    level = LOG_LEVEL ,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
-)
+Logger = logger ("main")
 
 def run():
     
@@ -28,9 +24,9 @@ def run():
     for stream in streams : 
         img = detect(stream)
         cv2.imshow("Frame" , img)
-        logging.info("camera streaming ....")
+        Logger.info("camera streaming ....")
         if cv2.waitKey(1) & 0xFF == ord("q"):
-            logging.info("camera streamin is stopping ... ")
+            Logger.info("camera streamin is stopping ... ")
             break
     
 run()
