@@ -1,5 +1,5 @@
 import logging
-from src.main import LOG_LEVEL , BASE_DIR
+from config import LOG_LEVEL , BASE_DIR
 import os 
 
 def logger(name):
@@ -26,5 +26,5 @@ def logger(name):
         fh.setFormatter(formatter)
     # add ch to logger
         logger.addHandler(ch)
-        logger.daddHandler(fh)
+        logger.addHandler(fh)
     return logger

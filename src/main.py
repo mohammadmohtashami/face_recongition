@@ -1,20 +1,14 @@
 import yaml 
 import os 
+import cv2
+import time
 from pathlib import Path
-from utils.logger import logger 
 from dotenv import load_dotenv
 from face_detection import detect
 from video_capture import stream_capture
-import cv2
+from config import BASE_DIR , SOURCE
+from utils.logger import logger 
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-dotenv_path = os.path.join(BASE_DIR , 'configs/config.yaml')
-load_dotenv(dotenv_path=dotenv_path)
-SOURCE =int(os.getenv("SOURCE" , 0))
-FPS = os.getenv("FPS",10)
-VIDEO_FLAG = os.getenv("VIDEO_FLAG",False)
-SAVE_DATA = os.getenv("SAVE_DATA", False)
-LOG_LEVEL =os.getenv("LOG_LEVEL" , 30)
 
 Logger = logger ("main")
 
@@ -23,6 +17,8 @@ def run():
     streams = stream_capture(SOURCE)
     for stream in streams : 
         img = detect(stream)
+
+
         cv2.imshow("Frame" , img)
         Logger.info("camera streaming ....")
         if cv2.waitKey(1) & 0xFF == ord("q"):
