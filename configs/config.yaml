@@ -1,6 +1,7 @@
 # this is the config file of the projects 
-
-
+EXIST_MODEL = 1
+CLASSES = FACE
+MODEL_PATH = model/model_openvino_model
 SOURCE = 0 
 VIDEO_FLAG = False
 SAVE_DATA = False
