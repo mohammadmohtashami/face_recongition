@@ -1,7 +1,7 @@
 import cv2 
 import matplotlib.pyplot as plt 
 import datetime
-from config import BASE_DIR , MODEL_PATH , EXIST_MODEL , CLASSES , SAVE_DATA
+from config import BASE_DIR , MODEL_PATH , EXIST_MODEL , CLASSES , SAVE_DATA , IMAGE_SAVED_PATH
 import os 
 import uuid 
 from database.insertation import insertation
@@ -10,6 +10,7 @@ import numpy as np
 import openvino as ov 
 import ipywidgets as widgets 
 from datetime import timedelta
+from deepface import DeepFace 
 
 if EXIST_MODEL == 0 : 
 
@@ -29,7 +30,7 @@ if EXIST_MODEL == 0 :
             for i in range(len(faces)) :
                 
                 current_time = datetime.datetime.now()
-                insertation(f"person{i}",datetime.datetime.now())
+                insertation(f"person{i}",datetime.datetime.now(),uuid.uuid4())
 
             if last_save_time is None or  (current_time - last_save_time) > timedelta(minutes=1)  :
                 now = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -44,9 +45,11 @@ if EXIST_MODEL == 0 :
         return img
     
 else : 
+    desired_persons = IMAGE_SAVED_PATH
+    faces_uuid = []
     core = ov.Core()
     device = widgets.Dropdown(
-        opetions = core.available_devices + ["AUTO"],
+        options = core.available_devices + ["AUTO"],
         value = "CPU",
         description = "Device",
         disabled = False
@@ -84,7 +87,7 @@ else :
             if len(indices) == 0 :
                 return []
             
-            return [(labels[idx] , scores[idx] , boxes[idx] ) for idx in indices.flatten()]
+        return [(labels[idx] , scores[idx] , boxes[idx] ) for idx in indices.flatten()]
     
     def draw_boxes (frame , boxes):
         for label , score , box  in boxes : 
@@ -93,16 +96,35 @@ else :
             y2 = box[1]+ box[3]
             
             cv2.rectangle(img = frame , pt1 = box[:2] , pt2 =(x2 ,y2) , color = (0,255,0) , thickness=3)
-            cv2.putText(
-                img = frame ,
-                text=f"{classes[label]} {score:.2f}",
-                org = (box[0] + 10 , box[1]+30),
-                fontFace= cv2.FONT_HERSHEY_COMPLEX,
-                fontScale=frame.shape[1] /1000 , 
-                color=(0 , 255,0),
-                thickness=1,
-                lineType=cv2.LINE_AA
+            croped_images =crop_image(frame,boxes)
+            for img in croped_images : 
+                for i in os.listdir(desired_persons):
+                    name = i.split(".jpg")[0]
+                    backends = ["ssd"]
+                    result = DeepFace.verify(img1_path = os.path.join(desired_persons, i), img2_path =img , detector_backends = backends[0])
+                    if result['verified'] == True:
+                        face_uuid = uuid.uuid4()
+                        faces_uuid.append(face_uuid)
+                        current_time = datetime.datetime.now()
+                        if face_uuid not in faces_uuid:
+                            insertation(name,current_time ,face_uuid)
+                        
+                        cv2.putText(
+                            img = frame ,
+                            text=f"{classes[label]} {score:.2f}",
+                            org = (box[0] + 10 , box[1]+30),
+                            fontFace= cv2.FONT_HERSHEY_COMPLEX,
+                            fontScale=frame.shape[1] /1000 , 
+                            color=(0 , 255,0),
+                            thickness=1,
+                            lineType=cv2.LINE_AA
             )
             
-        return frame 
+        return frame
     
+    def crop_image(img , boxes):
+        crops = []
+        for box in boxes:
+            x, y , w, h = map(int, box)
+            crops.append(img[ y : y+h  , x:x+w])
+        return crops
