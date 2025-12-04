@@ -83,8 +83,8 @@ else :
             scores.append(float(score))
             
             
-            indices = cv2.dnn.NMSBoxes(bboxes=boxes , scores = scores , score_threshold=thresh , nms_threshold=0.6)
-            if len(indices) == 0 :
+        indices = cv2.dnn.NMSBoxes(bboxes=boxes , scores = scores , score_threshold=thresh , nms_threshold=0.6)
+        if len(indices) == 0 :
                 return []
             
         return [(labels[idx] , scores[idx] , boxes[idx] ) for idx in indices.flatten()]
@@ -97,28 +97,41 @@ else :
             
             cv2.rectangle(img = frame , pt1 = box[:2] , pt2 =(x2 ,y2) , color = (0,255,0) , thickness=3)
             croped_images =crop_image(frame,boxes)
-            for img in croped_images : 
+            for image in croped_images : 
                 for i in os.listdir(desired_persons):
                     name = i.split(".jpg")[0]
                     backends = ["ssd"]
-                    result = DeepFace.verify(img1_path = os.path.join(desired_persons, i), img2_path =img , detector_backends = backends[0])
+                    result = DeepFace.verify(img1_path = os.path.join(desired_persons, i), img2_path =image , detector_backends = backends[0])
                     if result['verified'] == True:
                         face_uuid = uuid.uuid4()
-                        faces_uuid.append(face_uuid)
+                        
                         current_time = datetime.datetime.now()
-                        if face_uuid not in faces_uuid:
+                        if face_uuid not in faces_uuid and SAVE_DATA == True :
                             insertation(name,current_time ,face_uuid)
+                            faces_uuid.append(face_uuid)
                         
                         cv2.putText(
                             img = frame ,
-                            text=f"{classes[label]} {score:.2f}",
+                            text=f"{name} {score:.2f}",
                             org = (box[0] + 10 , box[1]+30),
                             fontFace= cv2.FONT_HERSHEY_COMPLEX,
                             fontScale=frame.shape[1] /1000 , 
                             color=(0 , 255,0),
                             thickness=1,
                             lineType=cv2.LINE_AA
-            )
+            )           
+                    else: 
+                        cv2.putText(
+                            img = frame ,
+                            text=f"{classes[0]} {score:.2f}",
+                            org = (box[0] + 10 , box[1]+30),
+                            fontFace= cv2.FONT_HERSHEY_COMPLEX,
+                            fontScale=frame.shape[1] /1000 , 
+                            color=(0 , 255,0),
+                            thickness=1,
+                            lineType=cv2.LINE_AA
+            )           
+                    
             
         return frame
     
