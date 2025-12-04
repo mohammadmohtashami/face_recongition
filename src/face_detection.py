@@ -1,7 +1,7 @@
 import cv2 
 import matplotlib.pyplot as plt 
 import datetime
-from config import BASE_DIR , MODEL_PATH , EXIST_MODEL , CLASSES
+from config import BASE_DIR , MODEL_PATH , EXIST_MODEL , CLASSES , SAVE_DATA
 import os 
 import uuid 
 from database.insertation import insertation
@@ -9,7 +9,7 @@ from ultralytics import YOLO
 import numpy as np 
 import openvino as ov 
 import ipywidgets as widgets 
-
+from datetime import timedelta
 
 if EXIST_MODEL == 0 : 
 
@@ -18,21 +18,24 @@ if EXIST_MODEL == 0 :
     image_dir = os.path.join(BASE_DIR , "images")
     os.makedirs(image_dir , exist_ok=True) 
 
+    last_save_time = None
+    
     def  detect (img):
-        faces_uuid =[]
+        global last_save_time
+        
         gray_img = cv2.cvtColor(img , cv2.COLOR_BGR2GRAY)
         faces = face_classifier.detectMultiScale(gray_img , scaleFactor=1.1 , minNeighbors=5 , minSize=(40 , 40))
+        if SAVE_DATA == True:
+            for i in range(len(faces)) :
+                
+                current_time = datetime.datetime.now()
+                insertation(f"person{i}",datetime.datetime.now())
 
-        for person in faces :
-            name = "person" 
-            face_uuid = str(uuid.uuid4())
-            insertation(name,datetime.datetime.now() , face_uuid)
-
-        if len(faces) > 0 and (face_uuid not in faces_uuid):
-            now = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-            image_path = os.path.join(image_dir , now)
-            cv2.imwrite(f"{image_path}.jpg" , img)
-            faces_uuid.append(face_uuid)
+            if last_save_time is None or  (current_time - last_save_time) > timedelta(minutes=1)  :
+                now = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                image_path = os.path.join(image_dir , now)
+                cv2.imwrite(f"{image_path}.jpg" , img)
+                last_save_time = datetime.datetime.now()
             
         for (x , y , w ,h ) in faces : 
             cv2.rectangle(img ,(x,y), (x+w , y+h ), (0,255 , 0) , 4)
