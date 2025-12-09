@@ -95,19 +95,21 @@ else :
             scores.append(float(confidence))
             
             
-        indices = cv2.dnn.NMSBoxes(bboxes=boxes , scores = float(scores)  , score_threshold=float(thresh) , nms_threshold=0.6)
+        indices = cv2.dnn.NMSBoxes(bboxes=boxes , scores = [float(s) for s in scores]  , score_threshold=float(thresh) , nms_threshold=0.6)
         if len(indices) == 0 :
                 return []
             
-        return [(labels[idx] , scores[idx] , boxes[idx] ) for idx in indices.flatten()]
+        return [(scores[idx] , boxes[idx] ) for idx in indices.flatten()]
     
     def draw_boxes (frame , boxes):
-        for label , score , box  in boxes : 
+        for  score , box  in boxes : 
             
             x2 = box[0] + box[2]
             y2 = box[1]+ box[3]
+            box_int = np.round(box).astype(np.int32)
+
             
-            cv2.rectangle(img = frame , pt1 = box[:2] , pt2 =(x2 ,y2) , color = (0,255,0) , thickness=3)
+            cv2.rectangle(img = frame , pt1 =box_int[:2] , pt2 =(int(x2) ,int(y2)) , color = (0,255,0) , thickness=3)
             croped_images =crop_image(frame,boxes)
             for image in croped_images : 
                 for i in os.listdir(desired_persons):
@@ -149,7 +151,9 @@ else :
     
     def crop_image(img , boxes):
         crops = []
-        for box in boxes:
-            x, y , w, h = map(int, box)
+        
+        for score ,box in boxes:
+            x , y ,w, h = map(int,box)
+            
             crops.append(img[ y : y+h  , x:x+w])
         return crops
