@@ -1,9 +1,11 @@
 # this is the config file of the projects 
 EXIST_MODEL = 1
 CLASSES = FACE
-MODEL_PATH = model/model_openvino_model
+MODEL_PATH = model/model_openvino_model/model.xml
 SOURCE = 0 
 VIDEO_FLAG = False
 SAVE_DATA = False
 FPS = 10
 LOG_LEVEL=30
+IMAGE_SAVED_PATH = "Attends_images"
+THRESHOLD = 0.5

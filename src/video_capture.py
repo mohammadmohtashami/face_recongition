@@ -1,5 +1,5 @@
 import cv2 
-from utils.logger import logger
+from .utils.logger import logger
 import time 
 
 Logger = logger("video_capture")

@@ -1,6 +1,6 @@
-import _mysql_connector
+import mysql.connector
 from src.utils.logger import logger
-from connection import get_connection
+from database.connection import get_connection
 
 
 logger = logger("insertation")

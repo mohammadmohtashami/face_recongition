@@ -1,5 +1,5 @@
 import logging
-from config import LOG_LEVEL , BASE_DIR
+from src.config import LOG_LEVEL , BASE_DIR
 import os 
 
 def logger(name):

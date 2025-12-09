@@ -1,7 +1,7 @@
 import cv2 
 import matplotlib.pyplot as plt 
 import datetime
-from config import BASE_DIR , MODEL_PATH , EXIST_MODEL , CLASSES , SAVE_DATA , IMAGE_SAVED_PATH
+from .config import BASE_DIR , MODEL_PATH , EXIST_MODEL , CLASSES , SAVE_DATA , IMAGE_SAVED_PATH
 import os 
 import uuid 
 from database.insertation import insertation
@@ -67,23 +67,35 @@ else :
     
     def process_results (frame , results ,thresh):
         h, w = frame.shape [:2]
-        
-        results = results.squeeze()
+        results_array = results[output_layer]
+        results = results_array.squeeze()
         boxes = []
         labels = []
         scores = []
         
-        for _ , label , score , xmin ,ymin , xmax , ymax in results:
+        if isinstance(results , dict):
+            results = list(results.values())[0]
+        
+        results = results.T
+        
+        
+        for box in results:
+            xcenter , ycenter , w ,h , confidence =box
+            xmin = xcenter - w/2
+            xmax = xcenter + w/2
+            ymin = ycenter - h /2 
+            ymax = ycenter + h/2
+            
             
             boxes.append(
                 (xmin*w , ymin*h , (xmax - xmin)*w , (ymax - ymin)*h))
                 
             
-            labels.append(int(label))
-            scores.append(float(score))
+            
+            scores.append(float(confidence))
             
             
-        indices = cv2.dnn.NMSBoxes(bboxes=boxes , scores = scores , score_threshold=thresh , nms_threshold=0.6)
+        indices = cv2.dnn.NMSBoxes(bboxes=boxes , scores = float(scores)  , score_threshold=float(thresh) , nms_threshold=0.6)
         if len(indices) == 0 :
                 return []
             

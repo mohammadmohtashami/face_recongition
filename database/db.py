@@ -1,6 +1,7 @@
-import _mysql_connector
+import mysql.connector
 
-db = _mysql_connector.connect(host ="localhost", 
+
+db = mysql.connector.connect(host ="localhost", 
                             user = "mohammad",
                             password = "facedetect")
 
